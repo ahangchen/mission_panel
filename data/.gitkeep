@@ -1,0 +1,7 @@
+# Data Directory
+This directory is mounted to the Docker containers and contains:
+
+- `mission_panel.db` - SQLite database
+- `logs/` - Application logs
+
+Do not commit database files to version control.
