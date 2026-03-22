@@ -1,9 +1,15 @@
 import { FiCalendar, FiMessageCircle, FiMessageSquare } from 'react-icons/fi'
+import type { IconType } from 'react-icons'
 
 /**
  * Task source configuration
  */
-export const TASK_SOURCES = {
+export const TASK_SOURCES: Record<string, {
+  label: string
+  icon: IconType
+  color: string
+  bgColor: string
+}> = {
   cron: {
     label: '定时任务',
     icon: FiCalendar,
