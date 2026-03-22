@@ -5,10 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
+import sys
+import os
+
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from ..database import get_db
 from ..models import Task
-from ..collectors.feishu_chat_collector import FeishuChatTaskCollector
+from collectors.feishu_chat_collector import FeishuChatTaskCollector
 
 router = APIRouter()
 
