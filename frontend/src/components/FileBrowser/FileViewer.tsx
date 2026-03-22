@@ -14,7 +14,7 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
 
   if (!filePath) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400">
+      <div className="h-full flex items-center justify-center text-gray-600">
         <div className="text-center">
           <FiFile className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Select a file to view its contents</p>
@@ -26,7 +26,7 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-gray-500">Loading file...</div>
+        <div className="text-gray-700">Loading file...</div>
       </div>
     )
   }
@@ -51,10 +51,10 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <FiFile className="w-5 h-5 text-gray-400" />
+          <FiFile className="w-5 h-5 text-gray-600" />
           <div>
             <h3 className="font-medium text-gray-900">{fileName}</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-700">
               {formatSize(data.size)} · {language}
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
               a.click()
               URL.revokeObjectURL(url)
             }}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-700 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
             title="Download"
           >
             <FiDownload className="w-5 h-5" />
@@ -79,7 +79,7 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
           
           <button
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-700 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
             title="Close"
           >
             <FiX className="w-5 h-5" />

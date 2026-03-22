@@ -16,13 +16,13 @@ export default function Dashboard() {
       
       {/* Task Stats */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold mb-4">Task Statistics (Past 7 Days)</h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900">Task Statistics (Past 7 Days)</h2>
         <TaskStats data={stats} />
       </div>
       
       {/* Recent Tasks */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold mb-4">Recent Tasks</h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900">Recent Tasks</h2>
         <TaskList />
       </div>
     </div>

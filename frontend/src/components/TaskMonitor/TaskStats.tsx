@@ -12,7 +12,7 @@ export default function TaskStats({ data }: TaskStatsProps) {
     { label: 'Completed', value: data.completed, icon: FiCheckCircle, color: 'text-green-500' },
     { label: 'Running', value: data.running, icon: FiClock, color: 'text-blue-500' },
     { label: 'Failed', value: data.failed, icon: FiXCircle, color: 'text-red-500' },
-    { label: 'Pending', value: data.pending, icon: FiCircle, color: 'text-gray-400' },
+    { label: 'Pending', value: data.pending, icon: FiCircle, color: 'text-gray-600' },
   ]
 
   return (
@@ -21,7 +21,7 @@ export default function TaskStats({ data }: TaskStatsProps) {
         <div key={label} className="bg-white rounded-lg p-4 border border-gray-200">
           <div className="flex items-center gap-2">
             <Icon className={`w-5 h-5 ${color}`} />
-            <span className="text-sm text-gray-500">{label}</span>
+            <span className="text-sm text-gray-700">{label}</span>
           </div>
           <p className="text-2xl font-bold mt-2">{value}</p>
         </div>

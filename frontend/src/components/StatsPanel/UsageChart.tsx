@@ -15,7 +15,7 @@ export default function UsageChart() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (loading) return <div className="text-gray-700">Loading...</div>
   if (!stats) return null
 
   const statusData = [

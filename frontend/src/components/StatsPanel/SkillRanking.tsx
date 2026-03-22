@@ -24,7 +24,7 @@ export default function SkillRanking() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (loading) return <div className="text-gray-700">Loading...</div>
   if (error) return <div className="text-red-500">Error: {error.message}</div>
 
   return (
@@ -35,7 +35,7 @@ export default function SkillRanking() {
       </h3>
       
       {skills.length === 0 ? (
-        <p className="text-gray-500 text-sm">No skill usage data available yet.</p>
+        <p className="text-gray-700 text-sm">No skill usage data available yet.</p>
       ) : (
         <div className="space-y-3">
           {skills.map((skill, index) => (
@@ -45,7 +45,7 @@ export default function SkillRanking() {
                   index === 0 ? 'bg-yellow-100 text-yellow-700' :
                   index === 1 ? 'bg-gray-100 text-gray-700' :
                   index === 2 ? 'bg-orange-100 text-orange-700' :
-                  'bg-gray-50 text-gray-500'
+                  'bg-gray-50 text-gray-700'
                 }`}>
                   {index + 1}
                 </span>
@@ -58,7 +58,7 @@ export default function SkillRanking() {
                     style={{ width: `${Math.min((skill.count / (skills[0]?.count || 1)) * 100, 100)}%` }}
                   />
                 </div>
-                <span className="text-sm text-gray-500 w-12 text-right">{skill.count}</span>
+                <span className="text-sm text-gray-700 w-12 text-right">{skill.count}</span>
               </div>
             </div>
           ))}

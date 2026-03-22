@@ -29,7 +29,7 @@ export default function TaskList() {
       ) : (
         <div className="space-y-3">
           {data?.tasks.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No tasks found</p>
+            <p className="text-gray-700 text-center py-8">No tasks found</p>
           ) : (
             data?.tasks.map((task) => <TaskCard key={task.id} task={task} />)
           )}

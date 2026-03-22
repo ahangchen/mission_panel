@@ -16,7 +16,7 @@ export default function OverviewCards() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (loading) return <div className="text-gray-700">Loading...</div>
   if (error) return <div className="text-red-500">Error: {error.message}</div>
   if (!data) return null
 
@@ -60,13 +60,13 @@ export default function OverviewCards() {
       {cards.map(({ label, value, subtext, icon: Icon, color, bg }) => (
         <div key={label} className="bg-white rounded-lg p-4 border border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-500">{label}</span>
+            <span className="text-sm text-gray-700">{label}</span>
             <div className={`p-2 rounded-lg ${bg}`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
           </div>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
-          <p className="text-xs text-gray-400 mt-1">{subtext}</p>
+          <p className="text-xs text-gray-600 mt-1">{subtext}</p>
         </div>
       ))}
     </div>

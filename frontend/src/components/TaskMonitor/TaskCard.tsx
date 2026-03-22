@@ -10,7 +10,7 @@ const statusConfig = {
   ok: { icon: FiCheckCircle, color: 'text-green-500', bg: 'bg-green-50', label: 'Completed' },
   error: { icon: FiXCircle, color: 'text-red-500', bg: 'bg-red-50', label: 'Failed' },
   running: { icon: FiClock, color: 'text-blue-500', bg: 'bg-blue-50', label: 'Running' },
-  pending: { icon: FiCircle, color: 'text-gray-400', bg: 'bg-gray-50', label: 'Pending' },
+  pending: { icon: FiCircle, color: 'text-gray-600', bg: 'bg-gray-50', label: 'Pending' },
 }
 
 export default function TaskCard({ task }: TaskCardProps) {
@@ -24,7 +24,7 @@ export default function TaskCard({ task }: TaskCardProps) {
           <StatusIcon className={`w-5 h-5 mt-0.5 ${config.color}`} />
           <div>
             <h3 className="font-medium text-gray-900">{task.task_name || task.job_id}</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               {formatDate(task.start_time)}
               {task.duration_ms && ` · ${formatDuration(task.duration_ms)}`}
             </p>

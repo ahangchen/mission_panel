@@ -22,9 +22,9 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
     setExpandedDirs(newExpanded)
   }
 
-  if (loading) return <div className="p-4 text-gray-500">Loading...</div>
-  if (error) return <div className="p-4 text-red-500">Error: {error.message}</div>
-  if (!data || !data.items || !data.items.length) return <div className="p-4 text-gray-500">Empty directory</div>
+  if (loading) return <div className="p-4 text-gray-700">Loading...</div>
+  if (error) return <div className="p-4 text-red-600">Error: {error.message}</div>
+  if (!data || !data.items || !data.items.length) return <div className="p-4 text-gray-700">Empty directory</div>
 
   return (
     <div className="overflow-auto h-full">
@@ -79,27 +79,27 @@ function FileNode({ item, depth, expanded, onToggle, onSelect, selectedPath }: F
         }}
       >
         {isDir && (
-          <span className="w-4 h-4 flex items-center justify-center text-gray-400">
+          <span className="w-4 h-4 flex items-center justify-center text-gray-600">
             {isExpanded ? <FiChevronDown /> : <FiChevronRight />}
           </span>
         )}
         {!isDir && <span className="w-4" />}
         
         {isDir ? (
-          <FiFolder className="w-4 h-4 text-yellow-500" />
+          <FiFolder className="w-4 h-4 text-yellow-600" />
         ) : (
-          <FiFile className="w-4 h-4 text-gray-400" />
+          <FiFile className="w-4 h-4 text-gray-600" />
         )}
         
-        <span className="text-sm truncate flex-1">{item.name}</span>
+        <span className="text-sm truncate flex-1 text-gray-900">{item.name}</span>
         
         {item.size !== undefined && !isDir && (
-          <span className="text-xs text-gray-400">{formatSize(item.size)}</span>
+          <span className="text-xs text-gray-600">{formatSize(item.size)}</span>
         )}
       </div>
       
       {isDir && isExpanded && (
-        <div className="text-gray-500 text-sm italic" style={{ paddingLeft: `${(depth + 1) * 16 + 24}px` }}>
+        <div className="text-gray-600 text-sm italic" style={{ paddingLeft: `${(depth + 1) * 16 + 24}px` }}>
           Loading...
         </div>
       )}
