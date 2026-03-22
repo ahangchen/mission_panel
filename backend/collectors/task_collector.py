@@ -133,11 +133,48 @@ class TaskCollector:
     def collect_incremental(self) -> int:
         """Collect only new records (based on file modification time)"""
         # For now, same as collect_all but can be optimized
-        return self.collect_all()
+        db = SessionLocal()
+        count = 0
+
+        try:
+            if not self.runs_dir.exists():
+                print(f"Runs directory not found: {self.runs_dir}")
+                return 0
+
+            for jsonl_file in self.runs_dir.glob("*.jsonl"):
+                records = self.parse_jsonl_file(jsonl_file)
+
+                for record in records:
+                    task_data = self.extract_task_data(record)
+                    if not task_data or not task_data.get("job_id"):
+                        continue
+
+                    # Check if task already exists
+                    existing = db.query(Task).filter(
+                        Task.job_id == task_data["job_id"]
+                    ).first()
+
+                    if existing:
+                        continue
+
+                    task = Task(**task_data)
+                    db.add(task)
+                    count += 1
+
+            db.commit()
+            print(f"Collected {count} new tasks")
+
+        except Exception as e:
+            db.rollback()
+            print(f"Error collecting tasks: {e}")
+        finally:
+            db.close()
+
+        return count
 
     def collect_all(self) -> int:
-        """Collect all task records (alias for collect_all method)"""
-        return self.collect_all()
+        """Collect all task records from runs directory (alias for collect_incremental)"""
+        return self.collect_incremental()
 
 
 if __name__ == "__main__":
