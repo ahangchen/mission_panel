@@ -1,5 +1,5 @@
 """
-Collect tasks from QQBot messages
+QQBot message collector - similar to Feishu collector
 """
 import json
 import re
@@ -11,36 +11,36 @@ from app.models import Task
 
 
 class QQBotTaskCollector:
-    """QQBot 任务采集器"""
+    """QQBot message collector"""
     
-    # 任务识别关键词
+    # Task identification keywords
     TASK_KEYWORDS = [
-        r'✅', r'❌', r'⚠️', r'🔧', r'📊', r'🎉',  # 状态标记
-        r'完成', r'实现', r'修复', r'添加', r'更新', r'配置',  # 动作词
-        r'feat:', r'fix:', r'docs:', r'refactor:',  # Git commit 前缀
-        r'成功', r'失败', r'错误',  # 结果词
+        r'✅', r'❌', r'⚠️', r'🔧', r'📊', r'🎉',  # Status markers
+        r'完成', r'实现', r'修复', r'添加', r'更新', r'配置',  # Action verbs
+        r'feat:', r'fix:', r'docs:', r'refactor:',  # Git commit prefixes
+        r'成功', r'失败', r'错误',  # Result words
     ]
     
-    # 排除的系统消息关键词
+    # System message keywords to exclude
     EXCLUDE_KEYWORDS = [
         r'HEARTBEAT_OK',
-        r'^\s*$',
+        r'^\s*$',  # Empty messages
     ]
     
     def __init__(self):
         self.source = 'qqbot'
     
     def is_task_message(self, content: str) -> bool:
-        """判断消息是否为任务相关"""
+        """Determine if a message is task-related"""
         if not content or len(content.strip()) == 0:
             return False
         
-        # 排除系统消息
+        # Exclude system messages
         for pattern in self.EXCLUDE_KEYWORDS:
             if re.search(pattern, content):
                 return False
         
-        # 检查任务关键词
+        # Check task keywords
         for pattern in self.TASK_KEYWORDS:
             if re.search(pattern, content, re.IGNORECASE):
                 return True
@@ -48,7 +48,7 @@ class QQBotTaskCollector:
         return False
     
     def extract_status(self, content: str) -> str:
-        """提取任务状态"""
+        """Extract task status"""
         if re.search(r'✅|成功|完成', content):
             return 'ok'
         elif re.search(r'❌|失败|错误', content):
@@ -57,15 +57,15 @@ class QQBotTaskCollector:
             return 'running'
     
     def extract_task_name(self, content: str) -> Optional[str]:
-        """提取任务名称"""
+        """Extract task name"""
         lines = [line.strip() for line in content.split('\n') if line.strip()]
         
         if not lines:
             return None
         
-        # 使用第一行
+        # Use first line
         first_line = lines[0]
-        # 移除状态标记
+        # Remove status markers
         name = re.sub(r'[✅❌⚠️🔧📊🎉]', '', first_line).strip()
         return name[:100] if name else None
     
@@ -75,15 +75,15 @@ class QQBotTaskCollector:
         db: Session,
         force_update: bool = False
     ) -> int:
-        """处理 QQBot 消息并保存到数据库
+        """Process QQBot messages and save to database
         
         Args:
-            messages: QQBot 消息列表
-            db: 数据库会话
-            force_update: 是否强制更新已存在的任务
+            messages: QQBot message list
+            db: Database session
+            force_update: Whether to force update existing tasks
             
         Returns:
-            新增/更新的任务数量
+            Number of tasks added/updated
         """
         count = 0
         
@@ -96,12 +96,12 @@ class QQBotTaskCollector:
                 if not self.is_task_message(content):
                     continue
                 
-                # 解析时间
+                # Parse time
                 if msg_time_str:
-                    # 尝试多种格式
-                    for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S']:
+                    # Try multiple formats
+                    for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S.%f']:
                         try:
-                            msg_time = datetime.strptime(msg_time_str, fmt)
+                            msg_time = datetime.strptime(msg_time_str.replace('+08:00', '').replace('Z', ''), fmt)
                             break
                         except:
                             continue
@@ -110,15 +110,15 @@ class QQBotTaskCollector:
                 else:
                     continue
                 
-                # 生成唯一 ID
+                # Generate unique ID
                 job_id = f"qqbot_{message_id}"
                 
-                # 检查是否已存在
+                # Check if already exists
                 existing = db.query(Task).filter(Task.job_id == job_id).first()
                 if existing and not force_update:
                     continue
                 
-                # 提取任务信息
+                # Extract task info
                 task_data = {
                     'job_id': job_id,
                     'task_name': self.extract_task_name(content),
@@ -129,11 +129,11 @@ class QQBotTaskCollector:
                 }
                 
                 if existing:
-                    # 更新
+                    # Update
                     for key, value in task_data.items():
                         setattr(existing, key, value)
                 else:
-                    # 新增
+                    # Add
                     task = Task(**task_data)
                     db.add(task)
                 
