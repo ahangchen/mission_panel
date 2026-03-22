@@ -1,11 +1,7 @@
-import { FiCheckCircle, FiXCircle, FiClock, FiCircle } from 'react-icons/fi'
+import { FiCalendar, FiMessageCircle, FiMessageSquare, FiCheckCircle, FiXCircle, FiClock, FiCircle } from 'react-icons/fi'
 import ReactMarkdown from 'react-markdown'
 import type { Task } from '../../api/types'
 import { formatDate, formatDuration } from '../../utils/formatDate'
-
-interface TaskCardProps {
-  task: Task
-}
 
 const statusConfig = {
   ok: { icon: FiCheckCircle, color: 'text-green-500', bg: 'bg-green-50', label: 'Completed' },
@@ -14,17 +10,40 @@ const statusConfig = {
   pending: { icon: FiCircle, color: 'text-gray-600', bg: 'bg-gray-50', label: 'Pending' },
 }
 
+const sourceConfig = {
+  cron: { icon: FiCalendar, color: 'text-blue-500', bg: 'bg-blue-50', label: '定时任务' },
+  feishu: { icon: FiMessageCircle, color: 'text-green-500', bg: 'bg-green-50', label: '飞书' },
+  qqbot: { icon: FiMessageSquare, color: 'text-purple-500', bg: 'bg-purple-50', label: 'QQBot' },
+}
+
+interface TaskCardProps {
+  task: Task
+}
+
 export default function TaskCard({ task }: TaskCardProps) {
-  const config = statusConfig[task.status]
-  const StatusIcon = config.icon
+  const status = statusConfig[task.status as keyof typeof statusConfig] || statusConfig.pending
+  const source = sourceConfig[task.source as keyof typeof sourceConfig] || sourceConfig.cron
+  
+  const StatusIcon = status.icon
+  const SourceIcon = source.icon
 
   return (
-    <div className={`${config.bg} rounded-lg p-4 border border-gray-200`}>
+    <div className={`${status.bg} rounded-lg p-4 border border-gray-200`}>
       <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3">
-          <StatusIcon className={`w-5 h-5 mt-0.5 ${config.color}`} />
-          <div>
-            <h3 className="font-medium text-gray-900">{task.task_name || task.job_id}</h3>
+        <div className="flex items-start gap-3 flex-1">
+          <StatusIcon className={`w-5 h-5 mt-0.5 ${status.color}`} />
+          <div className="flex-1">
+            {/* Task Name + Source Badge */}
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-gray-900">{task.task_name || task.job_id}</h3>
+              
+              {/* Source Badge */}
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${source.bg} ${source.color}`}>
+                <SourceIcon className="w-3 h-3" />
+                <span>{source.label}</span>
+              </span>
+            </div>
+            
             <p className="text-sm text-gray-700 mt-1">
               {formatDate(task.start_time)}
               {task.duration_ms && ` · ${formatDuration(task.duration_ms)}`}

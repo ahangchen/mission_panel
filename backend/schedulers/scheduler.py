@@ -90,6 +90,17 @@ def setup_schedulers():
     )
     logger.info("✅ Scheduled job: index_files (every 1 hour)")
     
+    # Collect realtime tasks every 10 minutes
+    from collectors.realtime_task_collector import collect_realtime_tasks
+    scheduler.add_job(
+        collect_realtime_tasks,
+        trigger=IntervalTrigger(minutes=10),
+        id='collect_realtime_tasks',
+        name='Collect Realtime Tasks from Feishu/QQBot',
+        replace_existing=True,
+    )
+    logger.info("✅ Scheduled job: collect_realtime_tasks (every 10 minutes)")
+    
     # Start scheduler
     scheduler.start()
     logger.info("✅ Scheduler started successfully")
