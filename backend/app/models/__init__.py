@@ -25,6 +25,7 @@ class Task(Base):
     input_tokens = Column(Integer)
     output_tokens = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
+    source = Column(String, default="cron")  # cron, feishu, qqbot
 
 
 class SkillUsage(Base):
