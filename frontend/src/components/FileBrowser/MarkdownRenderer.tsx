@@ -29,7 +29,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
             ) : (
-              <code className={className} {...props}>
+              <code className="bg-gray-100 text-gray-900 px-1 py-0.5 rounded text-sm" {...props}>
                 {children}
               </code>
             )
