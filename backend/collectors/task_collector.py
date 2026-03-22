@@ -135,7 +135,12 @@ class TaskCollector:
         # For now, same as collect_all but can be optimized
         return self.collect_all()
 
+    def collect_all(self) -> int:
+        """Collect all task records (alias for collect_all method)"""
+        return self.collect_all()
+
 
 if __name__ == "__main__":
     collector = TaskCollector()
-    collector.collect_all()
+    count = collector.collect_all()
+    print(f"Collected {count} tasks")
