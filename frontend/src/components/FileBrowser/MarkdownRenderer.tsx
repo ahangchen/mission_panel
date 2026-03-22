@@ -60,7 +60,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <li className="text-gray-700 pl-2">{children}</li>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-gray-900">{children}</strong>
+            <strong className="font-bold text-gray-900">{children}</strong>
           ),
           a: ({ href, children }) => (
             <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
