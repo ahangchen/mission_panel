@@ -1,55 +1,98 @@
 import { useFileContent } from '../../hooks/useFiles'
-import Loading from '../common/Loading'
 import CodeHighlight from './CodeHighlight'
 import MarkdownRenderer from './MarkdownRenderer'
+import { FiFile, FiX, FiDownload } from 'react-icons/fi'
+import { getLanguageFromExtension, getFileExtension, formatSize } from '../../utils/formatDate'
 
 interface FileViewerProps {
-  path: string | null
+  filePath: string | null
+  onClose: () => void
 }
 
-export default function FileViewer({ path }: FileViewerProps) {
-  const { data, loading, error } = useFileContent(path)
+export default function FileViewer({ filePath, onClose }: FileViewerProps) {
+  const { data, loading, error } = useFileContent(filePath)
 
-  if (!path) {
+  if (!filePath) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-500">
-        Select a file to view its contents
+      <div className="h-full flex items-center justify-center text-gray-400">
+        <div className="text-center">
+          <FiFile className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p>Select a file to view its contents</p>
+        </div>
       </div>
     )
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200">
-        <Loading />
+      <div className="h-full flex items-center justify-center">
+        <div className="text-gray-500">Loading file...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4 text-red-600">
-        Error: {error.message}
+      <div className="h-full flex items-center justify-center">
+        <div className="text-red-500">Error: {error.message}</div>
       </div>
     )
   }
 
   if (!data) return null
 
+  const extension = getFileExtension(data.path)
+  const language = data.language || getLanguageFromExtension(extension)
+  const isMarkdown = extension === 'md'
+  const fileName = data.path.split('/').pop() || data.path
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
-      {/* File header */}
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
-        <span className="font-medium text-gray-900">{data.path}</span>
-        <span className="text-sm text-gray-500">{data.size} bytes</span>
+    <div className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <FiFile className="w-5 h-5 text-gray-400" />
+          <div>
+            <h3 className="font-medium text-gray-900">{fileName}</h3>
+            <p className="text-sm text-gray-500">
+              {formatSize(data.size)} · {language}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const blob = new Blob([data.content], { type: 'text/plain' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = fileName
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            title="Download"
+          >
+            <FiDownload className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            title="Close"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* File content */}
-      <div className="p-4 overflow-auto max-h-[600px]">
-        {data.file_type === 'markdown' ? (
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        {isMarkdown ? (
           <MarkdownRenderer content={data.content} />
         ) : (
-          <CodeHighlight code={data.content} language={data.file_type} />
+          <CodeHighlight code={data.content} language={language} />
         )}
       </div>
     </div>

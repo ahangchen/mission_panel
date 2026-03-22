@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 interface UseWebSocketOptions {
-  onMessage?: (data: unknown) => void
+  url: string
+  onMessage?: (data: any) => void
   onOpen?: () => void
   onClose?: () => void
   onError?: (error: Event) => void
@@ -9,54 +10,62 @@ interface UseWebSocketOptions {
   reconnectInterval?: number
 }
 
-export function useWebSocket(path: string, options: UseWebSocketOptions = {}) {
-  const {
-    onMessage,
-    onOpen,
-    onClose,
-    onError,
-    reconnect = true,
-    reconnectInterval = 5000
-  } = options
-
+export function useWebSocket({
+  url,
+  onMessage,
+  onOpen,
+  onClose,
+  onError,
+  reconnect = true,
+  reconnectInterval = 3000,
+}: UseWebSocketOptions) {
   const [isConnected, setIsConnected] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const connect = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${protocol}//${window.location.host}${path}`
+    try {
+      const ws = new WebSocket(url)
 
-    const ws = new WebSocket(wsUrl)
-    wsRef.current = ws
-
-    ws.onopen = () => {
-      setIsConnected(true)
-      onOpen?.()
-    }
-
-    ws.onclose = () => {
-      setIsConnected(false)
-      onClose?.()
-
-      if (reconnect) {
-        reconnectTimeoutRef.current = setTimeout(connect, reconnectInterval)
+      ws.onopen = () => {
+        setIsConnected(true)
+        setError(null)
+        onOpen?.()
       }
-    }
 
-    ws.onerror = (error) => {
-      onError?.(error)
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        onMessage?.(data)
-      } catch {
-        onMessage?.(event.data)
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          onMessage?.(data)
+        } catch (err) {
+          // Handle plain text messages
+          onMessage?.(event.data)
+        }
       }
+
+      ws.onerror = (event) => {
+        setError('WebSocket error')
+        onError?.(event)
+      }
+
+      ws.onclose = () => {
+        setIsConnected(false)
+        onClose?.()
+
+        // Attempt to reconnect
+        if (reconnect) {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connect()
+          }, reconnectInterval)
+        }
+      }
+
+      wsRef.current = ws
+    } catch (err) {
+      setError('Failed to connect to WebSocket')
     }
-  }, [path, onMessage, onOpen, onClose, onError, reconnect, reconnectInterval])
+  }, [url, onMessage, onOpen, onClose, onError, reconnect, reconnectInterval])
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -65,7 +74,7 @@ export function useWebSocket(path: string, options: UseWebSocketOptions = {}) {
     wsRef.current?.close()
   }, [])
 
-  const send = useCallback((data: unknown) => {
+  const send = useCallback((data: any) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       const message = typeof data === 'string' ? data : JSON.stringify(data)
       wsRef.current.send(message)
@@ -74,8 +83,46 @@ export function useWebSocket(path: string, options: UseWebSocketOptions = {}) {
 
   useEffect(() => {
     connect()
-    return disconnect
+    return () => disconnect()
   }, [connect, disconnect])
 
-  return { isConnected, send, disconnect, reconnect: connect }
+  return {
+    isConnected,
+    error,
+    send,
+    disconnect,
+    reconnect: connect,
+  }
+}
+
+// Task updates WebSocket hook
+export function useTaskUpdates(onTaskUpdate?: (task: any) => void) {
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+
+  const { isConnected, error, send } = useWebSocket({
+    url: `ws://${window.location.hostname}:8000/ws/tasks`,
+    onMessage: (data) => {
+      if (data.type === 'task_update') {
+        setLastUpdate(new Date())
+        onTaskUpdate?.(data.data)
+      }
+    },
+    onOpen: () => {
+      console.log('WebSocket connected to task updates')
+    },
+    onClose: () => {
+      console.log('WebSocket disconnected from task updates')
+    },
+  })
+
+  const ping = useCallback(() => {
+    send('ping')
+  }, [send])
+
+  return {
+    isConnected,
+    error,
+    lastUpdate,
+    ping,
+  }
 }
