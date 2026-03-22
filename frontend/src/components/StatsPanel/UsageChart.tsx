@@ -38,7 +38,7 @@ export default function UsageChart() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -47,7 +47,9 @@ export default function UsageChart() {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip 
+                formatter={(value, name) => [value, name]}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -67,14 +69,14 @@ export default function UsageChart() {
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
         {statusData.map((entry, index) => (
           <div key={entry.name} className="flex items-center gap-2">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-3 h-3 rounded-full flex-shrink-0"
               style={{ backgroundColor: COLORS[index] }}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-700 truncate">
               {entry.name}: {entry.value}
             </span>
           </div>
