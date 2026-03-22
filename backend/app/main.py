@@ -4,12 +4,17 @@ FastAPI application for Mission Panel
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import sys
+import os
 
-from .api import tasks, files, stats
-from .api.realtime import router as realtime_router
-from .websocket import websocket_router
-from .database import engine, Base
-from .schedulers.scheduler import setup_schedulers
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.api import tasks, files, stats
+from app.api.realtime import router as realtime_router
+from app.websocket import router as websocket_router
+from app.database import engine, Base
+from app.schedulers.scheduler import setup_schedulers
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -26,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Mission Panel API",
-    description="Backend API for Mission Panel",
+    description="Home Automation Central Control Panel API",
     version="1.0.0",
     lifespan=lifespan
 )
