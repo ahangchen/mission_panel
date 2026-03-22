@@ -59,8 +59,9 @@ function FileNode({ item, depth, onFileSelect, selectedPath }: FileNodeProps) {
   const isSelected = selectedPath === item.path
   const isDir = item.is_directory
 
-  // 只有展开时才加载子目录数据
-  const { data: childData, loading: childLoading } = useFiles(isExpanded && isDir ? item.path : '')
+  // 只有展开且是目录时才加载数据，否则不加载
+  const shouldLoadChildren = isExpanded && isDir
+  const { data: childData, loading: childLoading } = useFiles(shouldLoadChildren ? item.path : '')
 
   const handleClick = () => {
     if (isDir) {
