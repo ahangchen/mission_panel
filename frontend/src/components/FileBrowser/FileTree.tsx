@@ -15,10 +15,20 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
   if (error) return <div className="p-4 text-red-600">Error: {error.message}</div>
   if (!data || !data.items || !data.items.length) return <div className="p-4 text-gray-700">Empty directory</div>
 
+  // 排序：文件夹在前，文件在后，都按字母顺序
+  const sortedItems = [...data.items].sort((a, b) => {
+    // 1. 文件夹在前，文件在后
+    if (a.is_directory && !b.is_directory) return -1
+    if (!a.is_directory && b.is_directory) return 1
+    
+    // 2. 同类型按字母顺序（不区分大小写）
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  })
+
   return (
     <div className="h-full overflow-auto bg-white">
       <div className="p-2">
-        {data.items.map((item) => (
+        {sortedItems.map((item) => (
           <FileNode
             key={item.path}
             item={item}
@@ -99,15 +109,24 @@ function FileNode({ item, depth, onFileSelect, selectedPath }: FileNodeProps) {
               Loading...
             </div>
           ) : childData && childData.items && childData.items.length > 0 ? (
-            childData.items.map((childItem) => (
-              <FileNode
-                key={childItem.path}
-                item={childItem}
-                depth={depth + 1}
-                onFileSelect={onFileSelect}
-                selectedPath={selectedPath}
-              />
-            ))
+            // 排序子目录：文件夹在前，文件在后，都按字母顺序
+            [...childData.items]
+              .sort((a, b) => {
+                // 1. 文件夹在前，文件在后
+                if (a.is_directory && !b.is_directory) return -1
+                if (!a.is_directory && b.is_directory) return 1
+                // 2. 同类型按字母顺序（不区分大小写）
+                return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+              })
+              .map((childItem) => (
+                <FileNode
+                  key={childItem.path}
+                  item={childItem}
+                  depth={depth + 1}
+                  onFileSelect={onFileSelect}
+                  selectedPath={selectedPath}
+                />
+              ))
           ) : (
             <div 
               className="text-gray-600 text-sm italic py-1"
