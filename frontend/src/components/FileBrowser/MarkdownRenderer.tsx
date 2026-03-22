@@ -44,20 +44,20 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-900">{children}</h3>
           ),
           p: ({ children }) => (
-            <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>
+            <p className="mb-4 text-gray-900 leading-relaxed">{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc list-outside ml-6 mb-4 space-y-2 text-gray-700">
+            <ul className="list-disc list-outside ml-6 mb-4 space-y-2 text-gray-900">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-outside ml-6 mb-4 space-y-2 text-gray-700">
+            <ol className="list-decimal list-outside ml-6 mb-4 space-y-2 text-gray-900">
               {children}
             </ol>
           ),
           li: ({ children }) => (
-            <li className="text-gray-700 pl-2">{children}</li>
+            <li className="text-gray-900 pl-2">{children}</li>
           ),
           strong: ({ children }) => (
             <strong className="font-bold text-gray-900">{children}</strong>
@@ -68,7 +68,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             </a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic text-gray-700">
+            <blockquote className="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic text-gray-900">
               {children}
             </blockquote>
           ),
@@ -86,7 +86,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <th className="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900">{children}</th>
           ),
           td: ({ children }) => (
-            <td className="border border-gray-300 px-4 py-2 text-gray-700">{children}</td>
+            <td className="border border-gray-300 px-4 py-2 text-gray-900">{children}</td>
           ),
         }}
       >
