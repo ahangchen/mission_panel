@@ -47,17 +47,20 @@ conda activate mission_panel
 ```bash
 cd ../frontend
 
-# 使用Vite创建React项目
-npm create vite@latest . -- --template react-ts
-npm install
+# 使用 pnpm 安装依赖（推荐）
+pnpm install
 
-# 安装依赖
-npm install tailwindcss postcss autoprefixer
-npm install recharts react-router-dom axios
-npm install react-markdown prismjs react-icons
+# 如果没有 pnpm，先全局安装：
+# npm install -g pnpm
 
-# 初始化Tailwind
-npx tailwindcss init -p
+# 依赖已在 package.json 中定义
+# 主要依赖：
+# - React 18 + TypeScript
+# - Vite（构建工具）
+# - Tailwind CSS（样式）
+# - Recharts（图表）
+# - react-router-dom（路由）
+# - react-markdown + prismjs（Markdown + 代码高亮）
 ```
 
 ### 第四步：开发环境启动
@@ -70,7 +73,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # 终端2: 启动前端
 cd frontend
-npm run dev
+pnpm run dev
 ```
 
 ## 📁 最小可行产品（MVP）结构
@@ -144,6 +147,7 @@ mission_panel/
 - ✅ 初始化项目结构（后端 + 前端）
 - ✅ 创建 conda 环境：`mission_panel` (Python 3.11.15)
 - ✅ 安装后端依赖：FastAPI + SQLAlchemy + APScheduler
+- ✅ 安装 pnpm 并配置前端依赖
 - 🔄 下一步：初始化数据库 + 测试 API
 
 ## 🆘 遇到问题？

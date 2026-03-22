@@ -17,7 +17,10 @@
 - **Python 环境**: Conda 环境 `mission_panel` (Python 3.11.15)
   - 位置: `/home/cwh/miniconda3/envs/mission_panel`
   - 激活命令: `conda activate mission_panel`
-- **Node.js**: 系统安装的 npm
+- **Node.js 环境**: pnpm v10.32.1
+  - 全局安装: `npm install -g pnpm`
+  - 包管理器: pnpm（节省磁盘空间，安装更快）
+  - 前端依赖位置: `/home/cwh/coding/mission_panel/frontend/node_modules`
 
 ### 前端
 - **框架**: React 18 + TypeScript
