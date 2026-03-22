@@ -1,7 +1,7 @@
-import { useFiles } from '../../hooks/useFiles'
-import { FiFolder, FiFile, FiChevronRight, FiChevronDown } from 'react-icons/fi'
 import { useState } from 'react'
+import { FiFolder, FiFile, FiChevronRight, FiChevronDown } from 'react-icons/fi'
 import { formatSize } from '../../utils/formatDate'
+import { useFiles } from '../../hooks/useFiles'
 
 interface FileTreeProps {
   onFileSelect: (path: string, type: 'file' | 'directory') => void
@@ -9,18 +9,7 @@ interface FileTreeProps {
 }
 
 export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) {
-  const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set())
   const { data, loading, error } = useFiles('')
-
-  const toggleDir = (path: string) => {
-    const newExpanded = new Set(expandedDirs)
-    if (newExpanded.has(path)) {
-      newExpanded.delete(path)
-    } else {
-      newExpanded.add(path)
-    }
-    setExpandedDirs(newExpanded)
-  }
 
   if (loading) return <div className="p-4 text-gray-700">Loading...</div>
   if (error) return <div className="p-4 text-red-600">Error: {error.message}</div>
@@ -34,9 +23,7 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
             key={item.path}
             item={item}
             depth={0}
-            expanded={expandedDirs}
-            onToggle={toggleDir}
-            onSelect={onFileSelect}
+            onFileSelect={onFileSelect}
             selectedPath={selectedPath}
           />
         ))}
@@ -53,16 +40,24 @@ interface FileNodeProps {
     size?: number
   }
   depth: number
-  expanded: Set<string>
-  onToggle: (path: string) => void
-  onSelect: (path: string, type: 'file' | 'directory') => void
+  onFileSelect: (path: string, type: 'file' | 'directory') => void
   selectedPath?: string
 }
 
-function FileNode({ item, depth, expanded, onToggle, onSelect, selectedPath }: FileNodeProps) {
-  const isExpanded = expanded.has(item.path)
+function FileNode({ item, depth, onFileSelect, selectedPath }: FileNodeProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const isSelected = selectedPath === item.path
   const isDir = item.is_directory
+
+  // 只有展开时才加载子目录数据
+  const { data: childData, loading: childLoading } = useFiles(isExpanded && isDir ? item.path : '')
+
+  const handleClick = () => {
+    if (isDir) {
+      setIsExpanded(!isExpanded)
+    }
+    onFileSelect(item.path, item.is_directory ? 'directory' : 'file')
+  }
 
   return (
     <div>
@@ -71,12 +66,7 @@ function FileNode({ item, depth, expanded, onToggle, onSelect, selectedPath }: F
           isSelected ? 'bg-blue-50' : ''
         }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
-        onClick={() => {
-          if (isDir) {
-            onToggle(item.path)
-          }
-          onSelect(item.path, item.is_directory ? 'directory' : 'file')
-        }}
+        onClick={handleClick}
       >
         {isDir && (
           <span className="w-4 h-4 flex items-center justify-center text-gray-600">
@@ -98,9 +88,34 @@ function FileNode({ item, depth, expanded, onToggle, onSelect, selectedPath }: F
         )}
       </div>
       
+      {/* 展开时显示子目录 */}
       {isDir && isExpanded && (
-        <div className="text-gray-600 text-sm italic" style={{ paddingLeft: `${(depth + 1) * 16 + 24}px` }}>
-          Loading...
+        <div>
+          {childLoading ? (
+            <div 
+              className="text-gray-600 text-sm italic py-1"
+              style={{ paddingLeft: `${(depth + 1) * 16 + 24}px` }}
+            >
+              Loading...
+            </div>
+          ) : childData && childData.items && childData.items.length > 0 ? (
+            childData.items.map((childItem) => (
+              <FileNode
+                key={childItem.path}
+                item={childItem}
+                depth={depth + 1}
+                onFileSelect={onFileSelect}
+                selectedPath={selectedPath}
+              />
+            ))
+          ) : (
+            <div 
+              className="text-gray-600 text-sm italic py-1"
+              style={{ paddingLeft: `${(depth + 1) * 16 + 24}px` }}
+            >
+              Empty folder
+            </div>
+          )}
         </div>
       )}
     </div>
