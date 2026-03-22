@@ -25,22 +25,21 @@ mkdir -p data/logs
 ```bash
 cd backend
 
-# 创建Python虚拟环境
-python3 -m venv venv
-source venv/bin.activate
+# 使用 conda 环境（推荐）
+conda activate mission_panel
 
-# 安装依赖
-pip install fastapi uvicorn sqlalchemy aiosqlite python-multipart
+# 如果环境不存在，创建它：
+# conda create -n mission_panel python=3.11 -y
+# conda activate mission_panel
+# pip install -r requirements.txt
 
-# 创建requirements.txt
-cat > requirements.txt << EOF
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-sqlalchemy==2.0.25
-aiosqlite==0.19.0
-python-multipart==0.0.6
-apscheduler==3.10.4
-EOF
+# 依赖已在 requirements.txt 中定义
+# fastapi==0.135.1
+# uvicorn[standard]==0.42.0
+# sqlalchemy==2.0.48
+# aiosqlite==0.22.1
+# python-multipart==0.0.22
+# apscheduler==3.11.2
 ```
 
 ### 第三步：前端初始化
@@ -66,7 +65,7 @@ npx tailwindcss init -p
 ```bash
 # 终端1: 启动后端
 cd backend
-source venv/bin.activate
+conda activate mission_panel
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # 终端2: 启动前端
@@ -142,7 +141,10 @@ mission_panel/
 - ✅ 创建plan目录
 - ✅ 编写开发计划（DEVELOPMENT_PLAN.md）
 - ✅ 编写快速开始指南（本文档）
-- 🔄 下一步：初始化项目结构
+- ✅ 初始化项目结构（后端 + 前端）
+- ✅ 创建 conda 环境：`mission_panel` (Python 3.11.15)
+- ✅ 安装后端依赖：FastAPI + SQLAlchemy + APScheduler
+- 🔄 下一步：初始化数据库 + 测试 API
 
 ## 🆘 遇到问题？
 

@@ -1,0 +1,35 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+*.egg-info/
+.Python build
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+
+.env.*.production
+
+# Database
+*.db
+*.sqlite
+
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+

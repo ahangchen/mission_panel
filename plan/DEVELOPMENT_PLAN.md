@@ -13,6 +13,12 @@
 
 ## 技术栈
 
+### 开发环境
+- **Python 环境**: Conda 环境 `mission_panel` (Python 3.11.15)
+  - 位置: `/home/cwh/miniconda3/envs/mission_panel`
+  - 激活命令: `conda activate mission_panel`
+- **Node.js**: 系统安装的 npm
+
 ### 前端
 - **框架**: React 18 + TypeScript
 - **UI库**: Tailwind CSS（响应式设计）
