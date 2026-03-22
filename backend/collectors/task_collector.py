@@ -48,136 +48,92 @@ class TaskCollector:
             start_time = None
             if record.get("runAtMs"):
                 start_time = datetime.fromtimestamp(record["runAtMs"] / 1000)
-            elif record.get("ts"):
-                start_time = datetime.fromtimestamp(record["ts"] / 1000)
             
-            # Get token usage
+            # Extract usage
             usage = record.get("usage", {})
+            input_tokens = usage.get("input_tokens", 0)
+            output_tokens = usage.get("output_tokens", 0)
+            
+            # Extract status
+            status = record.get("status", "running")
+            if record.get("action") == "finished":
+                status = record.get("status", "ok")
             
             return {
-                "job_id": record.get("jobId") or record.get("job_id") or record.get("id"),
-                "session_id": record.get("sessionId") or record.get("session_id"),
-                "task_name": record.get("task_name") or record.get("name"),
-                "status": record.get("status", "unknown"),
+                "job_id": record.get("jobId"),
+                "session_id": record.get("sessionId"),
+                "status": status,
                 "start_time": start_time,
-                "end_time": None,  # Not in current format
-                "duration_ms": record.get("durationMs") or record.get("duration_ms") or record.get("duration"),
-                "error_message": record.get("error") or record.get("error_message"),
-                "summary": record.get("summary"),
+                "duration_ms": record.get("durationMs"),
                 "model": record.get("model"),
                 "provider": record.get("provider"),
-                "input_tokens": usage.get("input_tokens") or record.get("input_tokens"),
-                "output_tokens": usage.get("output_tokens") or record.get("output_tokens"),
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "summary": record.get("summary"),
+                "error_message": record.get("error"),
+                "source": "cron",  # 标记来源
             }
         except Exception as e:
             print(f"Error extracting task data: {e}")
             return None
 
-    def parse_timestamp(self, ts) -> Optional[datetime]:
-        """Parse timestamp from various formats"""
-        if not ts:
-            return None
-        if isinstance(ts, datetime):
-            return ts
-        if isinstance(ts, (int, float)):
-            return datetime.fromtimestamp(ts)
-        if isinstance(ts, str):
-            for fmt in ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"]:
-                try:
-                    return datetime.strptime(ts, fmt)
-                except ValueError:
-                    continue
-        return None
-
-    def collect_all(self) -> int:
-        """Collect all task records from runs directory"""
-        db = SessionLocal()
-        count = 0
-
-        try:
-            if not self.runs_dir.exists():
-                print(f"Runs directory not found: {self.runs_dir}")
-                return 0
-
-            for jsonl_file in self.runs_dir.glob("*.jsonl"):
-                records = self.parse_jsonl_file(jsonl_file)
-
-                for record in records:
-                    task_data = self.extract_task_data(record)
-                    if not task_data or not task_data.get("job_id"):
-                        continue
-
-                    # Check if task already exists
-                    existing = db.query(Task).filter(
-                        Task.job_id == task_data["job_id"]
-                    ).first()
-
-                    if existing:
-                        continue
-
-                    task = Task(**task_data)
-                    db.add(task)
-                    count += 1
-
-            db.commit()
-            print(f"Collected {count} new tasks")
-
-        except Exception as e:
-            db.rollback()
-            print(f"Error collecting tasks: {e}")
-        finally:
-            db.close()
-
-        return count
-
     def collect_incremental(self) -> int:
-        """Collect only new records (based on file modification time)"""
-        # For now, same as collect_all but can be optimized
+        """Collect new tasks from recent files"""
         db = SessionLocal()
         count = 0
-
+        
         try:
             if not self.runs_dir.exists():
-                print(f"Runs directory not found: {self.runs_dir}")
                 return 0
-
-            for jsonl_file in self.runs_dir.glob("*.jsonl"):
-                records = self.parse_jsonl_file(jsonl_file)
-
+            
+            # Get all JSONL files, sorted by modification time (newest first)
+            jsonl_files = sorted(
+                self.runs_dir.glob("*.jsonl"),
+                key=lambda f: f.stat().st_mtime,
+                reverse=True
+            )
+            
+            # Process last 20 files
+            for file_path in jsonl_files[:20]:
+                records = self.parse_jsonl_file(file_path)
+                
                 for record in records:
                     task_data = self.extract_task_data(record)
-                    if not task_data or not task_data.get("job_id"):
+                    if not task_data:
                         continue
-
+                    
                     # Check if task already exists
                     existing = db.query(Task).filter(
                         Task.job_id == task_data["job_id"]
                     ).first()
-
+                    
                     if existing:
-                        continue
-
-                    task = Task(**task_data)
-                    db.add(task)
-                    count += 1
-
+                        # Update existing task
+                        for key, value in task_data.items():
+                            if value is not None:
+                                setattr(existing, key, value)
+                    else:
+                        # Create new task
+                        task = Task(**task_data)
+                        db.add(task)
+                        count += 1
+            
             db.commit()
-            print(f"Collected {count} new tasks")
-
+            return count
+            
         except Exception as e:
-            db.rollback()
             print(f"Error collecting tasks: {e}")
+            db.rollback()
+            return 0
         finally:
             db.close()
 
-        return count
-
     def collect_all(self) -> int:
-        """Collect all task records from runs directory (alias for collect_incremental)"""
+        """Collect all tasks"""
         return self.collect_incremental()
 
 
 if __name__ == "__main__":
     collector = TaskCollector()
-    count = collector.collect_all()
-    print(f"Collected {count} tasks")
+    count = collector.collect_incremental()
+    print(f"Collected {count} new tasks")
