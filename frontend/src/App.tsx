@@ -8,14 +8,14 @@ import Stats from './pages/Stats'
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/files" element={<Files />} />
-          <Route path="/stats" element={<Stats />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="files" element={<Files />} />
+          <Route path="stats" element={<Stats />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   )
 }
