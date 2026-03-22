@@ -16,19 +16,14 @@ interface FileListData {
 
 export function useFiles(path: string = '') {
   const [data, setData] = useState<FileListData | null>(null)
-  const [loading, setLoading] = useState(false)  // 改为 false，避免初始加载
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const currentPathRef = useRef<string>('')  // 跟踪当前请求的路径
+  const currentPathRef = useRef<string | null>(null)
 
   const fetchFiles = useCallback(async () => {
-    // 如果 path 为空，不加载（避免加载根目录数据到子目录）
-    if (!path) {
-      return
-    }
-
     setLoading(true)
     setError(null)
-    currentPathRef.current = path  // 记录当前请求的路径
+    currentPathRef.current = path
 
     try {
       const result = await filesAPI.listDirectory(path)
@@ -51,9 +46,8 @@ export function useFiles(path: string = '') {
   useEffect(() => {
     fetchFiles()
     
-    // 清理函数：当 path 改变时，清除旧数据
     return () => {
-      currentPathRef.current = ''
+      currentPathRef.current = null
     }
   }, [fetchFiles])
 
