@@ -1,57 +1,84 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { statsAPI } from '../../api/client'
-import type { ModelStatsResponse } from '../../api/types'
-import Loading from '../common/Loading'
 import { useState, useEffect } from 'react'
+import { tasksAPI } from '../../api/client'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import type { TaskStats } from '../../api/types'
 
-const COLORS = ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1']
+const COLORS = ['#10B981', '#EF4444', '#3B82F6', '#9CA3AF']
 
 export default function UsageChart() {
-  const [data, setData] = useState<ModelStatsResponse | null>(null)
+  const [stats, setStats] = useState<TaskStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    statsAPI.getModelStats()
-      .then(setData)
-      .catch(err => setError(err instanceof Error ? err : new Error('Unknown error')))
+    tasksAPI.getTaskStats()
+      .then(setStats)
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <Loading />
-  if (error) return <div className="text-red-600">Error: {error.message}</div>
-  if (!data) return null
+  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (!stats) return null
 
-  const chartData = data.models.map(m => ({
-    name: m.model,
-    value: m.count,
-    percentage: m.percentage,
-  }))
+  const statusData = [
+    { name: 'Completed', value: stats.completed },
+    { name: 'Failed', value: stats.failed },
+    { name: 'Running', value: stats.running },
+    { name: 'Pending', value: stats.pending },
+  ]
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="font-bold text-lg mb-4">Model Usage Distribution</h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={5}
-              dataKey="value"
-              label={({ name, percentage }) => `${name}: ${percentage}%`}
-            >
-              {chartData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold mb-4">Task Status Distribution</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pie Chart */}
+        <div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={statusData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {statusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Bar Chart */}
+        <div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={statusData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#3B82F6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex justify-center gap-6 mt-4">
+        {statusData.map((entry, index) => (
+          <div key={entry.name} className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: COLORS[index] }}
+            />
+            <span className="text-sm text-gray-600">
+              {entry.name}: {entry.value}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   )

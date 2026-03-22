@@ -1,54 +1,69 @@
-import { useQuery } from '../../hooks/useTasks'
 import { statsAPI } from '../../api/client'
-import type { SkillStatsResponse } from '../../api/types'
-import Loading from '../common/Loading'
+import { useState, useEffect } from 'react'
+import { FiAward } from 'react-icons/fi'
 
-export default function SkillRanking() {
-  const { data, loading, error } = useQuery<SkillStatsResponse>(() => statsAPI.getSkillStats())
-
-  if (loading) return <Loading />
-  if (error) return <div className="text-red-600">Error: {error.message}</div>
-  if (!data) return null
-
-  const maxCount = Math.max(...data.ranking.map(r => r.count))
-
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="font-bold text-lg mb-4">Skill Usage Ranking (Last {data.period_days} Days)</h3>
-      <div className="space-y-3">
-        {data.ranking.map((skill) => (
-          <div key={skill.skill_name}>
-            <div className="flex items-center justify-between text-sm mb-1">
-              <span className="font-medium">{skill.rank}. {skill.skill_name}</span>
-              <span className="text-gray-500">{skill.count} times</span>
-            </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary-500 rounded-full"
-                style={{ width: `${(skill.count / maxCount) * 100}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+interface SkillUsage {
+  skill_name: string
+  count: number
+  last_used: string
 }
 
-// Simple useQuery hook for stats
-function useQuery<T>(fetcher: () => Promise<T>) {
-  const [data, setData] = useState<T | null>(null)
+export default function SkillRanking() {
+  const [skills, setSkills] = useState<SkillUsage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    fetcher()
-      .then(setData)
+    statsAPI.getSkillStats(7, 10)
+      .then((data: any) => {
+        // Handle different response formats
+        const skillList = Array.isArray(data) ? data : (data.skills || [])
+        setSkills(skillList)
+      })
       .catch(err => setError(err instanceof Error ? err : new Error('Unknown error')))
       .finally(() => setLoading(false))
   }, [])
 
-  return { data, loading, error }
-}
+  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (error) return <div className="text-red-500">Error: {error.message}</div>
 
-import { useState, useEffect } from 'react'
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <FiAward className="w-5 h-5 text-yellow-500" />
+        Top Skills (Past 7 Days)
+      </h3>
+      
+      {skills.length === 0 ? (
+        <p className="text-gray-500 text-sm">No skill usage data available yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {skills.map((skill, index) => (
+            <div key={skill.skill_name} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                  index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                  index === 1 ? 'bg-gray-100 text-gray-700' :
+                  index === 2 ? 'bg-orange-100 text-orange-700' :
+                  'bg-gray-50 text-gray-500'
+                }`}>
+                  {index + 1}
+                </span>
+                <span className="text-sm font-medium text-gray-900">{skill.skill_name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-24 bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full" 
+                    style={{ width: `${Math.min((skill.count / (skills[0]?.count || 1)) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="text-sm text-gray-500 w-12 text-right">{skill.count}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,23 +1,27 @@
-// API Type definitions
+// Type definitions for Mission Panel API
 
 export interface Task {
   id: number
   job_id: string
-  task_name: string | null
+  session_id?: string
+  task_name?: string
   status: 'ok' | 'error' | 'running' | 'pending'
-  start_time: string | null
-  end_time: string | null
-  duration_ms: number | null
-  model: string | null
-  summary: string | null
+  start_time: string
+  end_time?: string
+  duration_ms?: number
+  error_message?: string
+  summary?: string
+  model?: string
+  provider?: string
+  input_tokens?: number
+  output_tokens?: number
 }
 
-export interface TaskDetail extends Task {
-  session_id: string | null
-  error_message: string | null
-  provider: string | null
-  input_tokens: number | null
-  output_tokens: number | null
+export interface TaskListResponse {
+  total: number
+  page: number
+  page_size: number
+  tasks: Task[]
 }
 
 export interface TaskStats {
@@ -28,57 +32,40 @@ export interface TaskStats {
   pending: number
 }
 
-export interface TaskListResponse {
-  total: number
-  page: number
-  page_size: number
-  tasks: Task[]
-}
-
-export interface FileItem {
+export interface FileInfo {
   name: string
   path: string
-  is_directory: boolean
-  size: number
-  modified_time: number
+  type: 'file' | 'directory'
+  size?: number
+  modified_time?: string
+  extension?: string
 }
 
 export interface FileListResponse {
   path: string
-  items: FileItem[]
+  files: FileInfo[]
 }
 
 export interface FileContentResponse {
   path: string
   content: string
-  file_type: string
+  language?: string
   size: number
 }
 
-export interface SkillRanking {
-  rank: number
+export interface SkillUsage {
   skill_name: string
   count: number
-  avg_duration_ms: number
+  last_used: string
 }
 
-export interface SkillStatsResponse {
-  period_days: number
-  ranking: SkillRanking[]
-}
-
-export interface ModelStats {
+export interface ModelUsage {
   model: string
-  count: number
-  percentage: number
-  total_input_tokens: number
-  total_output_tokens: number
-}
-
-export interface ModelStatsResponse {
-  period_days: number
-  total_tasks: number
-  models: ModelStats[]
+  provider: string
+  input_tokens: number
+  output_tokens: number
+  total_tokens: number
+  task_count: number
 }
 
 export interface OverviewStats {
@@ -97,17 +84,4 @@ export interface OverviewStats {
     unique_count: number
     total_calls: number
   }
-}
-
-export interface SearchResult {
-  name: string
-  path: string
-  is_directory: boolean
-  size: number
-}
-
-export interface SearchResponse {
-  query: string
-  count: number
-  results: SearchResult[]
 }

@@ -1,9 +1,8 @@
-import { FiCheckCircle, FiCpu, FiZap } from 'react-icons/fi'
 import { statsAPI } from '../../api/client'
-import type { OverviewStats } from '../../api/types'
-import Loading from '../common/Loading'
-import { formatTokens } from '../../utils/formatSize'
 import { useState, useEffect } from 'react'
+import type { OverviewStats } from '../../api/types'
+import { FiActivity, FiCpu, FiDatabase, FiTrendingUp } from 'react-icons/fi'
+import { formatNumber } from '../../utils/formatDate'
 
 export default function OverviewCards() {
   const [data, setData] = useState<OverviewStats | null>(null)
@@ -17,55 +16,57 @@ export default function OverviewCards() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <Loading />
-  if (error) return <div className="text-red-600">Error: {error.message}</div>
+  if (loading) return <div className="text-gray-500">Loading...</div>
+  if (error) return <div className="text-red-500">Error: {error.message}</div>
   if (!data) return null
 
   const cards = [
     {
-      title: 'Tasks Completed',
+      label: 'Tasks Completed',
       value: data.tasks.completed,
-      subValue: `${data.tasks.success_rate}% success rate`,
-      icon: FiCheckCircle,
-      color: 'bg-green-500',
+      subtext: `${data.tasks.success_rate.toFixed(1)}% success rate`,
+      icon: FiActivity,
+      color: 'text-green-500',
+      bg: 'bg-green-50',
     },
     {
-      title: 'Total Tasks',
-      value: data.tasks.total,
-      subValue: `Last ${data.period}`,
+      label: 'Total Tokens',
+      value: formatNumber(data.tokens.total),
+      subtext: `${formatNumber(data.tokens.input)} in / ${formatNumber(data.tokens.output)} out`,
       icon: FiCpu,
-      color: 'bg-blue-500',
+      color: 'text-blue-500',
+      bg: 'bg-blue-50',
     },
     {
-      title: 'Tokens Used',
-      value: formatTokens(data.tokens.total),
-      subValue: `${formatTokens(data.tokens.input)} in / ${formatTokens(data.tokens.output)} out`,
-      icon: FiZap,
-      color: 'bg-purple-500',
+      label: 'Skills Used',
+      value: data.skills.unique_count,
+      subtext: `${formatNumber(data.skills.total_calls)} total calls`,
+      icon: FiDatabase,
+      color: 'text-purple-500',
+      bg: 'bg-purple-50',
     },
     {
-      title: 'Skill Calls',
-      value: data.skills.total_calls,
-      subValue: `${data.skills.unique_count} unique skills`,
-      icon: FiZap,
-      color: 'bg-orange-500',
+      label: 'Success Rate',
+      value: `${data.tasks.success_rate.toFixed(1)}%`,
+      subtext: `Last ${data.period}`,
+      icon: FiTrendingUp,
+      color: 'text-orange-500',
+      bg: 'bg-orange-50',
     },
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map(({ title, value, subValue, icon: Icon, color }) => (
-        <div key={title} className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className={`${color} p-2 rounded-lg`}>
-              <Icon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">{title}</p>
-              <p className="text-xl font-bold">{value}</p>
-              <p className="text-xs text-gray-400">{subValue}</p>
+      {cards.map(({ label, value, subtext, icon: Icon, color, bg }) => (
+        <div key={label} className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-500">{label}</span>
+            <div className={`p-2 rounded-lg ${bg}`}>
+              <Icon className={`w-4 h-4 ${color}`} />
             </div>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs text-gray-400 mt-1">{subtext}</p>
         </div>
       ))}
     </div>
