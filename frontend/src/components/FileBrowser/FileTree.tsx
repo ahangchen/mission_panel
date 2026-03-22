@@ -27,7 +27,7 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
   if (!data || !data.items || !data.items.length) return <div className="p-4 text-gray-700">Empty directory</div>
 
   return (
-    <div className="overflow-auto h-full">
+    <div className="h-full overflow-auto bg-white">
       <div className="p-2">
         {data.items.map((item) => (
           <FileNode

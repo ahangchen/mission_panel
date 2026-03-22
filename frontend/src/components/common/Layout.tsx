@@ -10,7 +10,7 @@ const navItems = [
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -18,9 +18,9 @@ export default function Layout() {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex h-[calc(100vh-57px)]">
         {/* Sidebar */}
-        <aside className="w-16 md:w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-57px)] sticky top-[57px]">
+        <aside className="w-16 md:w-64 bg-white border-r border-gray-200 flex-shrink-0">
           <nav className="p-2 md:p-4">
             <ul className="space-y-2">
               {navItems.map(({ to, icon: Icon, label }) => (
@@ -45,7 +45,7 @@ export default function Layout() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 overflow-auto bg-gray-100 p-4 md:p-6">
           <Outlet />
         </main>
       </div>
