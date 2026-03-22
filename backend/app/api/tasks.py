@@ -49,6 +49,7 @@ async def get_week_tasks(
                 "duration_ms": t.duration_ms,
                 "model": t.model,
                 "summary": t.summary,
+                "source": t.source,  # 添加 source 字段
             }
             for t in tasks
         ]
