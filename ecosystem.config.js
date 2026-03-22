@@ -17,14 +17,14 @@ module.exports = {
       max_memory_restart: '500M',
       error_file: '/tmp/mission-panel-backend-error.log',
       out_file: '/tmp/mission-panel-backend-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true
     },
     {
       name: 'mission-panel-frontend',
-      cwd: '/home/cwh/coding/mission_panel/frontend',
-      script: '/usr/bin/pnpm',
-      args: 'run preview --host 0.0.0.0 --port 3000',
-      interpreter: 'none',
+      cwd: '/home/cwh/coding/mission_panel',
+      script: 'start-frontend.sh',
+      interpreter: 'bash',
       env: {
         NODE_ENV: 'production'
       },
@@ -35,7 +35,8 @@ module.exports = {
       max_memory_restart: '500M',
       error_file: '/tmp/mission-panel-frontend-error.log',
       out_file: '/tmp/mission-panel-frontend-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true
     }
   ]
 };
