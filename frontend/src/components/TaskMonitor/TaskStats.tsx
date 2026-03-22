@@ -1,11 +1,14 @@
 import { FiCheckCircle, FiXCircle, FiClock, FiCircle } from 'react-icons/fi'
-import type { TaskStats } from '../../api/types'
 
 interface TaskStatsProps {
-  data: TaskStats | null
+  days: number
 }
 
-export default function TaskStats({ data }: TaskStatsProps) {
+import { useTaskStats } from '../../hooks/useTasks'
+
+export default function TaskStats({ days }: TaskStatsProps) {
+  const { data } = useTaskStats(days)
+
   if (!data) return null
 
   const stats = [
@@ -16,16 +19,18 @@ export default function TaskStats({ data }: TaskStatsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {stats.map(({ label, value, icon: Icon, color }) => (
-        <div key={label} className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center gap-2">
+    <div className="bg-white rounded-lg p-4 border border-gray-200">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="flex items-center gap-3">
             <Icon className={`w-5 h-5 ${color}`} />
-            <span className="text-sm text-gray-700">{label}</span>
+            <div>
+              <p className="text-sm text-gray-600">{label}</p>
+              <p className="text-2xl font-bold mt-2 text-gray-900">{value}</p>
+            </div>
           </div>
-          <p className="text-2xl font-bold mt-2 text-gray-900">{value}</p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

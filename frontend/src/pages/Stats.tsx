@@ -1,19 +1,34 @@
-import OverviewCards from '../components/StatsPanel/OverviewCards'
-import SkillRanking from '../components/StatsPanel/SkillRanking'
-import UsageChart from '../components/StatsPanel/UsageChart'
+import { useState } from 'react'
 import Header from '../components/common/Header'
+import PeriodSelector from '../components/common/PeriodSelector'
+import OverviewCards from '../components/StatsPanel/OverviewCards'
+import UsageChart from '../components/StatsPanel/UsageChart'
+import SkillRanking from '../components/StatsPanel/SkillRanking'
 
 export default function Stats() {
+  const [period, setPeriod] = useState(7) // 默认 7 天
+
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col">
       <Header 
         title="Statistics" 
-        subtitle="Task performance and usage analytics" 
+        subtitle="Mission Panel Usage Analytics" 
       />
-      <OverviewCards />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <div className="flex-1 overflow-auto mt-4 space-y-6">
+        {/* Period Selector */}
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <PeriodSelector value={period} onChange={setPeriod} />
+        </div>
+
+        {/* Overview Cards */}
+        <OverviewCards days={period} />
+
+        {/* Usage Chart */}
+        <UsageChart days={period} />
+
+        {/* Skill Ranking */}
         <SkillRanking />
-        <UsageChart />
       </div>
     </div>
   )

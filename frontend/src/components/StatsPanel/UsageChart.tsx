@@ -5,18 +5,23 @@ import type { TaskStats } from '../../api/types'
 
 const COLORS = ['#10B981', '#3B82F6', '#EF4444', '#6B7280']
 
-export default function UsageChart() {
+interface UsageChartProps {
+  days: number
+}
+
+export default function UsageChart({ days }: UsageChartProps) {
   const [stats, setStats] = useState<TaskStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    tasksAPI.getTaskStats()
+    setLoading(true)
+    tasksAPI.getTaskStats(days)
       .then((res: any) => {
         if (res) setStats(res)
       })
       .catch((err: any) => console.error(err))
       .finally(() => setLoading(false))
-  }, [])
+  }, [days])
 
   if (loading || !stats) {
     return <div className="text-gray-700">Loading...</div>

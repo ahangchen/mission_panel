@@ -20,13 +20,19 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
 // Tasks API
 export const tasksAPI = {
-  getWeekTasks: (status?: string, page = 1, pageSize = 50) => {
-    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) })
+  getWeekTasks: (status?: string, page = 1, pageSize = 50, days = 7) => {
+    const params = new URLSearchParams({ 
+      page: String(page), 
+      page_size: String(pageSize),
+      days: String(days)
+    })
     if (status) params.append('status', status)
     return fetchAPI(`/tasks/week?${params}`)
   },
 
-  getTaskStats: () => fetchAPI('/tasks/stats'),
+  getTaskStats: (days = 7) => {
+    return fetchAPI(`/tasks/stats?days=${days}`)
+  },
 
   getTaskDetail: (taskId: number) => fetchAPI(`/tasks/${taskId}`),
 
@@ -61,5 +67,5 @@ export const statsAPI = {
     return fetchAPI(`/stats/models?days=${days}`)
   },
 
-  getOverview: () => fetchAPI('/stats/overview'),
+  getOverview: (days = 7) => fetchAPI(`/stats/overview?days=${days}`),
 }

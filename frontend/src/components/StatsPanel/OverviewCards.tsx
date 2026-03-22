@@ -1,22 +1,27 @@
-import { statsAPI } from '../../api/client'
 import { useState, useEffect } from 'react'
+import { statsAPI } from '../../api/client'
 import type { OverviewStats } from '../../api/types'
 import { FiActivity, FiCpu, FiDatabase, FiTrendingUp } from 'react-icons/fi'
 import { formatNumber } from '../../utils/formatDate'
 
-export default function OverviewCards() {
+interface OverviewCardsProps {
+  days: number
+}
+
+export default function OverviewCards({ days }: OverviewCardsProps) {
   const [data, setData] = useState<OverviewStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    statsAPI.getOverview()
+    setLoading(true)
+    statsAPI.getOverview(days)
       .then((res: any) => {
         if (res) setData(res)
       })
       .catch(err => setError(err instanceof Error ? err : new Error('Unknown error')))
       .finally(() => setLoading(false))
-  }, [])
+  }, [days])
 
   if (loading) return <div className="text-gray-700">Loading...</div>
   if (error) return <div className="text-red-500">Error: {error.message}</div>
@@ -50,7 +55,7 @@ export default function OverviewCards() {
     {
       label: 'Success Rate',
       value: `${data.tasks.success_rate.toFixed(1)}%`,
-      subtext: 'Last 7 days',
+      subtext: `Last ${days} days`,
       icon: FiTrendingUp,
       color: 'text-green-500',
       bg: 'bg-green-50',

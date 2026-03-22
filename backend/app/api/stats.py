@@ -89,37 +89,41 @@ async def get_model_stats(
 
 
 @router.get("/overview")
-async def get_overview(db: Session = Depends(get_db)):
+async def get_overview(
+    days: int = Query(7, ge=1, le=90, description="统计天数（1-90天）"),
+    db: Session = Depends(get_db)
+):
     """Get overview statistics"""
-    week_ago = datetime.utcnow() - timedelta(days=7)
+    start_date = datetime.utcnow() - timedelta(days=days)
 
     # Task counts
-    total_tasks = db.query(Task).filter(Task.start_time >= week_ago).count()
+    total_tasks = db.query(Task).filter(Task.start_time >= start_date).count()
     completed_tasks = db.query(Task).filter(
-        Task.start_time >= week_ago,
+        Task.start_time >= start_date,
         Task.status == "ok"
     ).count()
 
     # Token usage
     total_input_tokens = db.query(func.sum(Task.input_tokens)).filter(
-        Task.start_time >= week_ago
+        Task.start_time >= start_date
     ).scalar() or 0
 
     total_output_tokens = db.query(func.sum(Task.output_tokens)).filter(
-        Task.start_time >= week_ago
+        Task.start_time >= start_date
     ).scalar() or 0
 
     # Skill usage
     skill_count = db.query(func.count(func.distinct(SkillUsage.skill_name))).filter(
-        SkillUsage.timestamp >= week_ago
+        SkillUsage.timestamp >= start_date
     ).scalar() or 0
 
     total_skill_calls = db.query(SkillUsage).filter(
-        SkillUsage.timestamp >= week_ago
+        SkillUsage.timestamp >= start_date
     ).count()
 
     return {
-        "period": "7 days",
+        "period": f"{days} days",
+        "period_days": days,
         "tasks": {
             "total": total_tasks,
             "completed": completed_tasks,

@@ -17,11 +17,12 @@ async def get_week_tasks(
     status: Optional[str] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
+    days: int = Query(7, ge=1, le=90, description="统计天数（1-90天）"),
     db: Session = Depends(get_db)
 ):
-    """Get tasks from the past week"""
-    week_ago = datetime.utcnow() - timedelta(days=7)
-    query = db.query(Task).filter(Task.start_time >= week_ago)
+    """Get tasks from the past N days"""
+    start_date = datetime.utcnow() - timedelta(days=days)
+    query = db.query(Task).filter(Task.start_time >= start_date)
 
     if status:
         query = query.filter(Task.status == status)
@@ -36,6 +37,7 @@ async def get_week_tasks(
         "total": total,
         "page": page,
         "page_size": page_size,
+        "period_days": days,
         "tasks": [
             {
                 "id": t.id,
@@ -54,21 +56,24 @@ async def get_week_tasks(
 
 
 @router.get("/stats")
-async def get_task_stats(db: Session = Depends(get_db)):
-    """Get task statistics for the past week"""
-    week_ago = datetime.utcnow() - timedelta(days=7)
+async def get_task_stats(
+    days: int = Query(7, ge=1, le=90, description="统计天数（1-90天）"),
+    db: Session = Depends(get_db)
+):
+    """Get task statistics for the past N days"""
+    start_date = datetime.utcnow() - timedelta(days=days)
 
-    total = db.query(Task).filter(Task.start_time >= week_ago).count()
+    total = db.query(Task).filter(Task.start_time >= start_date).count()
     completed = db.query(Task).filter(
-        Task.start_time >= week_ago,
+        Task.start_time >= start_date,
         Task.status == "ok"
     ).count()
     failed = db.query(Task).filter(
-        Task.start_time >= week_ago,
+        Task.start_time >= start_date,
         Task.status == "error"
     ).count()
     running = db.query(Task).filter(
-        Task.start_time >= week_ago,
+        Task.start_time >= start_date,
         Task.status == "running"
     ).count()
 
@@ -77,7 +82,8 @@ async def get_task_stats(db: Session = Depends(get_db)):
         "completed": completed,
         "failed": failed,
         "running": running,
-        "pending": total - completed - failed - running
+        "pending": total - completed - failed - running,
+        "period_days": days
     }
 
 
