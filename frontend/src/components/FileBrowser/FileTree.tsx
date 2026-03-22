@@ -24,15 +24,15 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
 
   if (loading) return <div className="p-4 text-gray-500">Loading...</div>
   if (error) return <div className="p-4 text-red-500">Error: {error.message}</div>
-  if (!data || !data.files.length) return <div className="p-4 text-gray-500">Empty directory</div>
+  if (!data || !data.items || !data.items.length) return <div className="p-4 text-gray-500">Empty directory</div>
 
   return (
     <div className="overflow-auto h-full">
       <div className="p-2">
-        {data.files.map((file) => (
+        {data.items.map((item) => (
           <FileNode
-            key={file.path}
-            file={file}
+            key={item.path}
+            item={item}
             depth={0}
             expanded={expandedDirs}
             onToggle={toggleDir}
@@ -46,10 +46,10 @@ export default function FileTree({ onFileSelect, selectedPath }: FileTreeProps) 
 }
 
 interface FileNodeProps {
-  file: {
+  item: {
     name: string
     path: string
-    type: 'file' | 'directory'
+    is_directory: boolean
     size?: number
   }
   depth: number
@@ -59,10 +59,10 @@ interface FileNodeProps {
   selectedPath?: string
 }
 
-function FileNode({ file, depth, expanded, onToggle, onSelect, selectedPath }: FileNodeProps) {
-  const isExpanded = expanded.has(file.path)
-  const isSelected = selectedPath === file.path
-  const isDir = file.type === 'directory'
+function FileNode({ item, depth, expanded, onToggle, onSelect, selectedPath }: FileNodeProps) {
+  const isExpanded = expanded.has(item.path)
+  const isSelected = selectedPath === item.path
+  const isDir = item.is_directory
 
   return (
     <div>
@@ -73,9 +73,9 @@ function FileNode({ file, depth, expanded, onToggle, onSelect, selectedPath }: F
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         onClick={() => {
           if (isDir) {
-            onToggle(file.path)
+            onToggle(item.path)
           }
-          onSelect(file.path, file.type)
+          onSelect(item.path, item.is_directory ? 'directory' : 'file')
         }}
       >
         {isDir && (
@@ -91,10 +91,10 @@ function FileNode({ file, depth, expanded, onToggle, onSelect, selectedPath }: F
           <FiFile className="w-4 h-4 text-gray-400" />
         )}
         
-        <span className="text-sm truncate flex-1">{file.name}</span>
+        <span className="text-sm truncate flex-1">{item.name}</span>
         
-        {file.size !== undefined && (
-          <span className="text-xs text-gray-400">{formatSize(file.size)}</span>
+        {item.size !== undefined && !isDir && (
+          <span className="text-xs text-gray-400">{formatSize(item.size)}</span>
         )}
       </div>
       

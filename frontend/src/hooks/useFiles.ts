@@ -2,8 +2,20 @@ import { useState, useEffect, useCallback } from 'react'
 import { filesAPI } from '../api/client'
 import type { FileListResponse, FileContentResponse } from '../api/types'
 
+// API returns items[], not files[]
+interface FileListData {
+  path: string
+  items: Array<{
+    name: string
+    path: string
+    is_directory: boolean
+    size?: number
+    modified_time?: number
+  }>
+}
+
 export function useFiles(path: string = '') {
-  const [data, setData] = useState<FileListResponse | null>(null)
+  const [data, setData] = useState<FileListData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
