@@ -2,6 +2,7 @@
 Configuration management using environment variables
 """
 import os
+from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
 
@@ -11,12 +12,12 @@ class Settings(BaseSettings):
     APP_NAME: str = "Mission Panel"
     DEBUG: bool = False
 
-    # Database settings
-    DATABASE_URL: str = "sqlite:///./data/mission_panel.db"
+    # Database settings - use absolute path
+    DATABASE_URL: str = "sqlite:////home/cwh/coding/mission_panel/data/mission_panel.db"
 
     # Data directories
-    OPENCLAW_DATA_DIR: str = "/data/openclaw"
-    CODING_DIR: str = "/data/coding"
+    OPENCLAW_DATA_DIR: str = "/home/cwh/.openclaw"
+    CODING_DIR: str = "/home/cwh/coding"
 
     # CORS settings
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]

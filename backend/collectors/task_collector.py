@@ -40,24 +40,37 @@ class TaskCollector:
 
     def extract_task_data(self, record: dict) -> Optional[dict]:
         """Extract task data from a record"""
-        # Adapt this based on actual OpenClaw data format
         try:
+            # Handle OpenClaw cron/runs format
+            # Fields: jobId, sessionId, status, ts, runAtMs, durationMs, model, provider, usage
+            
+            # Get timestamps
+            start_time = None
+            if record.get("runAtMs"):
+                start_time = datetime.fromtimestamp(record["runAtMs"] / 1000)
+            elif record.get("ts"):
+                start_time = datetime.fromtimestamp(record["ts"] / 1000)
+            
+            # Get token usage
+            usage = record.get("usage", {})
+            
             return {
-                "job_id": record.get("job_id") or record.get("id"),
-                "session_id": record.get("session_id"),
+                "job_id": record.get("jobId") or record.get("job_id") or record.get("id"),
+                "session_id": record.get("sessionId") or record.get("session_id"),
                 "task_name": record.get("task_name") or record.get("name"),
                 "status": record.get("status", "unknown"),
-                "start_time": self.parse_timestamp(record.get("start_time")),
-                "end_time": self.parse_timestamp(record.get("end_time")),
-                "duration_ms": record.get("duration_ms") or record.get("duration"),
+                "start_time": start_time,
+                "end_time": None,  # Not in current format
+                "duration_ms": record.get("durationMs") or record.get("duration_ms") or record.get("duration"),
                 "error_message": record.get("error") or record.get("error_message"),
                 "summary": record.get("summary"),
                 "model": record.get("model"),
                 "provider": record.get("provider"),
-                "input_tokens": record.get("input_tokens"),
-                "output_tokens": record.get("output_tokens"),
+                "input_tokens": usage.get("input_tokens") or record.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens") or record.get("output_tokens"),
             }
-        except Exception:
+        except Exception as e:
+            print(f"Error extracting task data: {e}")
             return None
 
     def parse_timestamp(self, ts) -> Optional[datetime]:

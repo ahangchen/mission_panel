@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .api import tasks, files, stats
-from .websocket import websocket_router
+from .websocket import router as websocket_router
 
 app = FastAPI(
     title="Mission Panel API",
