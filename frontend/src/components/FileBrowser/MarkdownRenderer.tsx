@@ -47,13 +47,20 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700">{children}</ul>
+            <ul className="list-disc list-outside ml-6 mb-4 space-y-2 text-gray-700">
+              {children}
+            </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-inside mb-4 space-y-2 text-gray-700">{children}</ol>
+            <ol className="list-decimal list-outside ml-6 mb-4 space-y-2 text-gray-700">
+              {children}
+            </ol>
           ),
           li: ({ children }) => (
-            <li className="text-gray-700">{children}</li>
+            <li className="text-gray-700 pl-2">{children}</li>
+          ),
+          strong: ({ children }) => (
+            <strong className="font-semibold text-gray-900">{children}</strong>
           ),
           a: ({ href, children }) => (
             <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
