@@ -15,6 +15,7 @@ export interface Task {
   provider?: string
   input_tokens?: number
   output_tokens?: number
+  source?: string  // Task source: cron, feishu, qqbot
 }
 
 export interface TaskListResponse {
