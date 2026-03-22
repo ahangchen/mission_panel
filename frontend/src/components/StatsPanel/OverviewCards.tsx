@@ -11,7 +11,9 @@ export default function OverviewCards() {
 
   useEffect(() => {
     statsAPI.getOverview()
-      .then(setData)
+      .then((res: any) => {
+        if (res) setData(res)
+      })
       .catch(err => setError(err instanceof Error ? err : new Error('Unknown error')))
       .finally(() => setLoading(false))
   }, [])
@@ -39,8 +41,8 @@ export default function OverviewCards() {
     },
     {
       label: 'Skills Used',
-      value: data.skills.unique_count,
-      subtext: `${formatNumber(data.skills.total_calls)} total calls`,
+      value: data.skills.total_calls,
+      subtext: `${data.skills.unique_count} unique skills`,
       icon: FiDatabase,
       color: 'text-purple-500',
       bg: 'bg-purple-50',
@@ -48,27 +50,31 @@ export default function OverviewCards() {
     {
       label: 'Success Rate',
       value: `${data.tasks.success_rate.toFixed(1)}%`,
-      subtext: `Last ${data.period}`,
+      subtext: 'Last 7 days',
       icon: FiTrendingUp,
-      color: 'text-orange-500',
-      bg: 'bg-orange-50',
+      color: 'text-green-500',
+      bg: 'bg-green-50',
     },
   ]
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map(({ label, value, subtext, icon: Icon, color, bg }) => (
-        <div key={label} className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-700">{label}</span>
-            <div className={`p-2 rounded-lg ${bg}`}>
-              <Icon className={`w-4 h-4 ${color}`} />
+      {cards.map((card) => {
+        const Icon = card.icon
+        return (
+          <div
+            key={card.label}
+            className={`${card.bg} rounded-lg p-4 border border-gray-200`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">{card.label}</span>
+              <Icon className={`w-5 h-5 ${card.color}`} />
             </div>
+            <div className="text-2xl font-bold text-gray-900">{card.value}</div>
+            <div className="text-xs text-gray-500 mt-1">{card.subtext}</div>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-          <p className="text-xs text-gray-600 mt-1">{subtext}</p>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

@@ -2,13 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { tasksAPI } from '../api/client'
 import type { TaskListResponse, TaskStats } from '../api/types'
 
-interface UseTasksOptions {
-  status?: string
-  page?: number
-  pageSize?: number
-}
-
-export function useTasks(options: UseTasksOptions = {}) {
+export function useTasks(filters?: { status?: string }) {
   const [data, setData] = useState<TaskListResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -17,14 +11,16 @@ export function useTasks(options: UseTasksOptions = {}) {
     setLoading(true)
     setError(null)
     try {
-      const result = await tasksAPI.getWeekTasks(options.status, options.page, options.pageSize)
-      setData(result)
+      const result = await tasksAPI.getWeekTasks(filters?.status)
+      if (result) {
+        setData(result as TaskListResponse)
+      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       setLoading(false)
     }
-  }, [options.status, options.page, options.pageSize])
+  }, [filters?.status])
 
   useEffect(() => {
     fetchTasks()
@@ -40,8 +36,10 @@ export function useTaskStats() {
 
   useEffect(() => {
     tasksAPI.getTaskStats()
-      .then(setData)
-      .catch(err => setError(err instanceof Error ? err : new Error('Unknown error')))
+      .then((res: any) => {
+        if (res) setData(res)
+      })
+      .catch((err: any) => setError(err instanceof Error ? err : new Error('Unknown error')))
       .finally(() => setLoading(false))
   }, [])
 

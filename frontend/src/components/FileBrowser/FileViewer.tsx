@@ -10,7 +10,7 @@ interface FileViewerProps {
 }
 
 export default function FileViewer({ filePath, onClose }: FileViewerProps) {
-  const { data, loading, error } = useFileContent(filePath)
+  const { content, loading, error } = useFileContent(filePath)
 
   if (!filePath) {
     return (
@@ -26,7 +26,7 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-gray-700">Loading file...</div>
+        <div className="text-gray-700">Loading...</div>
       </div>
     )
   }
@@ -34,65 +34,73 @@ export default function FileViewer({ filePath, onClose }: FileViewerProps) {
   if (error) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-red-500">Error: {error.message}</div>
+        <div className="text-red-600">Error: {error.message}</div>
       </div>
     )
   }
 
-  if (!data) return null
+  if (!content) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-gray-500 flex items-center gap-2">
+          <FiFile className="w-12 h-12" />
+          <span className="text-sm">Select a file to view its contents</span>
+        </div>
+      </div>
+    )
+  }
 
-  const extension = getFileExtension(data.path)
-  const language = data.language || getLanguageFromExtension(extension)
-  const isMarkdown = extension === 'md'
-  const fileName = data.path.split('/').pop() || data.path
+  const { path: fileName, content: fileContent, size, type } = content
+  const fileExtension = getFileExtension(fileName)
+  const language = getLanguageFromExtension(fileExtension)
+  const isMarkdown = fileExtension === 'md' || type === 'markdown'
+
+  const handleDownload = () => {
+    const blob = new Blob([fileContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = window.document.createElement('a')
+    a.href = url
+    a.download = fileName
+    window.document.body.appendChild(a)
+    a.click()
+    window.document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <FiFile className="w-5 h-5 text-gray-600" />
-          <div>
-            <h3 className="font-medium text-gray-900">{fileName}</h3>
-            <p className="text-sm text-gray-700">
-              {formatSize(data.size)} · {language}
-            </p>
-          </div>
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-white flex-shrink-0">
+        <div>
+          <h3 className="font-medium text-gray-900">{fileName}</h3>
+          <p className="text-xs text-gray-500">{formatSize(size)} • {type}</p>
         </div>
-        
         <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              const blob = new Blob([data.content], { type: 'text/plain' })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = fileName
-              a.click()
-              URL.revokeObjectURL(url)
-            }}
-            className="p-2 text-gray-700 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            onClick={handleDownload}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             title="Download"
           >
-            <FiDownload className="w-5 h-5" />
+            <FiDownload className="w-4 h-4" />
           </button>
-          
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-700 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
-            title="Close"
-          >
-            <FiX className="w-5 h-5" />
-          </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Close"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
         {isMarkdown ? (
-          <MarkdownRenderer content={data.content} />
+          <MarkdownRenderer content={fileContent} />
         ) : (
-          <CodeHighlight code={data.content} language={language} />
+          <CodeHighlight code={fileContent} language={language} />
         )}
       </div>
     </div>
