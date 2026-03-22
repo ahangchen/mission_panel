@@ -1,6 +1,6 @@
 """
-Schedulers - APScheduler integration for Mission Panel
+Schedulers module for Mission Panel
 """
-from .scheduler import start_scheduler, shutdown_scheduler
+from .scheduler import setup_schedulers, get_scheduler_status
 
-__all__ = ["start_scheduler", "shutdown_scheduler"]
+__all__ = ['setup_schedulers', 'get_scheduler_status']
