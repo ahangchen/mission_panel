@@ -23,7 +23,7 @@ export default function TaskStats({ data }: TaskStatsProps) {
             <Icon className={`w-5 h-5 ${color}`} />
             <span className="text-sm text-gray-700">{label}</span>
           </div>
-          <p className="text-2xl font-bold mt-2">{value}</p>
+          <p className="text-2xl font-bold mt-2 text-gray-900">{value}</p>
         </div>
       ))}
     </div>
