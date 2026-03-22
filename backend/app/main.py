@@ -14,7 +14,7 @@ from app.api import tasks, files, stats
 from app.api.realtime import router as realtime_router
 from app.websocket import router as websocket_router
 from app.database import engine, Base
-from app.schedulers.scheduler import setup_schedulers
+from schedulers.scheduler import setup_schedulers
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
