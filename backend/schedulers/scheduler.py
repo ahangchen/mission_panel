@@ -15,7 +15,7 @@ def collect_tasks():
     """Collect tasks from OpenClaw cron runs"""
     try:
         from collectors.task_collector import TaskCollector
-        from database import SessionLocal
+        from app.database import SessionLocal
         
         db = SessionLocal()
         try:
@@ -44,7 +44,7 @@ def index_files():
     """Index files in coding directory"""
     try:
         from collectors.file_collector import FileCollector
-        from database import SessionLocal
+        from app.database import SessionLocal
         
         db = SessionLocal()
         try:
